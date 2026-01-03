@@ -13,7 +13,6 @@ namespace CompanionSabotageSystem
         {
             // On déclare notre classe custom
             AddClassDefinition(typeof(SpyData), 1);
-            AddClassDefinition(typeof(SpyPartyComponent), 3); // <--- AJOUTE ÇA (ID différent de SpyData)
         }
 
         protected override void DefineEnumTypes()

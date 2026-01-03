@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.Actions; // Important pour DestroyPartyAction
+using TaleWorlds.CampaignSystem.Actions; // Pour TakePrisonerAction et TeleportHeroAction
 using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
@@ -27,7 +27,8 @@ namespace CompanionSabotageSystem
         public override void RegisterEvents()
         {
             CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
-            CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, OnDailyTick);
+            // On passe en HourlyTick pour une gestion plus fine du temps
+            CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, OnHourlyTick);
         }
 
         public override void SyncData(IDataStore dataStore)
@@ -94,40 +95,26 @@ namespace CompanionSabotageSystem
         {
             Settlement target = Settlement.CurrentSettlement;
 
-            // On sort du menu pour revenir à la carte, sinon le jeu n'aime pas spawner des entités
+            // On sort du menu pour revenir à la carte (bonne pratique UI)
             GameMenu.ExitToLast();
 
-            // On délègue la création physique à SpyManager
-            SpyManager.CreateSpyParty(spy, target);
+            // Appel au Manager pour la logique d'abstraction
+            SpyManager.StartMission(spy, target);
         }
 
-        // --- ENREGISTREMENT (Appelé par SpyManager) ---
-        public void RegisterSpyMission(Hero spy, Settlement target, MobileParty spyParty)
+        // --- ENREGISTREMENT ---
+        public void RegisterSpyMission(Hero spy, Settlement target, float travelHours)
         {
             if (!_activeSpies.ContainsKey(spy))
             {
-                // CORRECTION : GetDistance avec 5 arguments
-                float distance = Campaign.Current.Models.MapDistanceModel.GetDistance(
-                    MobileParty.MainParty,
-                    target,
-                    false,
-                    MobileParty.NavigationType.Default,
-                    out _
-                );
-
-                int travelDays = (int)Math.Ceiling(distance / 50f);
-
-                var data = new SpyData(spy, target, travelDays, SpyState.TravelingToTarget)
-                {
-                    PartyId = spyParty.StringId
-                };
-
+                // On crée la mission abstraite
+                var data = new SpyData(spy, target, travelHours, SpyState.TravelingToTarget);
                 _activeSpies.Add(spy, data);
             }
         }
 
-        // --- BOUCLE LOGIQUE (DAILY TICK) ---
-        private void OnDailyTick()
+        // --- BOUCLE LOGIQUE (HOURLY TICK) ---
+        private void OnHourlyTick()
         {
             List<Hero> toRemove = new List<Hero>();
             List<Hero> activeHeroes = new List<Hero>(_activeSpies.Keys);
@@ -142,63 +129,52 @@ namespace CompanionSabotageSystem
 
                 var data = _activeSpies[spy];
 
+                // Décrémentation du timer
+                if (data.HoursRemaining > 0)
+                {
+                    data.HoursRemaining -= 1f;
+                }
+
                 switch (data.State)
                 {
                     case SpyState.TravelingToTarget:
-                        MobileParty physicalParty = Campaign.Current.CampaignObjectManager.Find<MobileParty>(data.PartyId);
-
-                        // CORRECTION : Utilisation de GetPositionAsVec3() pour compatibilité
-                        if (physicalParty != null && physicalParty.GetPositionAsVec3().AsVec2.DistanceSquared(data.TargetSettlement.GatePosition.ToVec2()) < 25f)
+                        if (data.HoursRemaining <= 0)
                         {
-                            // ARRIVÉE
+                            // Arrivée "Virtuelle"
                             data.State = SpyState.Infiltrating;
-                            data.DaysRemaining = 5;
-
-                            // CORRECTION : Utilisation de DestroyPartyAction
-                            DestroyPartyAction.Apply(null, physicalParty);
+                            // Durée de la mission sur place (ex: 5 jours = 120 heures)
+                            data.HoursRemaining = 5 * 24f;
 
                             InformationManager.DisplayMessage(new InformationMessage($"{spy.Name} has infiltrated {data.TargetSettlement.Name}. Operation starting.", Colors.Yellow));
-                        }
-                        else if (physicalParty == null)
-                        {
-                            // Fallback sécurité
-                            data.State = SpyState.Infiltrating;
-                            data.DaysRemaining = 5;
                         }
                         break;
 
                     case SpyState.Infiltrating:
-                        data.DaysRemaining--;
-
-                        bool captured = CheckForCapture(spy, data.TargetSettlement);
-                        if (captured)
+                        // On vérifie le statut chaque jour (toutes les 24h restantes, ex: 96, 72, 48...)
+                        // Utilisation du modulo pour exécuter une fois par jour
+                        if (Math.Abs(data.HoursRemaining % 24) < 0.1f && data.HoursRemaining > 0)
                         {
-                            toRemove.Add(spy);
-                        }
-                        else
-                        {
-                            PerformSabotage(data);
-
-                            if (data.DaysRemaining <= 0)
+                            bool captured = CheckForCapture(spy, data.TargetSettlement);
+                            if (captured)
                             {
-                                StartReturnJourney(spy, data);
+                                toRemove.Add(spy);
                             }
+                            else
+                            {
+                                PerformSabotage(data);
+                            }
+                        }
+
+                        // Fin de mission
+                        if (data.HoursRemaining <= 0)
+                        {
+                            StartReturnJourney(spy, data);
                         }
                         break;
 
                     case SpyState.ReturningToPlayer:
-                        data.DaysRemaining--;
-
-                        // CORRECTION : GetDistance 5 arguments pour le retour
-                        float distToPlayer = Campaign.Current.Models.MapDistanceModel.GetDistance(
-                            MobileParty.MainParty,
-                            data.TargetSettlement,
-                            false,
-                            MobileParty.NavigationType.Default,
-                            out _
-                        );
-
-                        if (data.DaysRemaining <= 0 || distToPlayer < 10f)
+                        // Retour terminé
+                        if (data.HoursRemaining <= 0)
                         {
                             ReturnSpyFinal(spy, data);
                             toRemove.Add(spy);
@@ -213,17 +189,28 @@ namespace CompanionSabotageSystem
         // --- LOGIQUE INTERNE ---
         private bool CheckForCapture(Hero spy, Settlement target)
         {
+            // Paramètre de difficulté récupéré depuis les Settings (si tu utilises MCM, sinon 1.0f par défaut)
+            float difficultyMult = SabotageSettings.Instance != null ? SabotageSettings.Instance.DifficultyFactor : 1.0f;
+
             float security = target.Town.Security;
             float skill = spy.GetSkillValue(DefaultSkills.Roguery);
-            float riskFactor = (security * 1.2f) - skill;
-            if (riskFactor < 2) riskFactor = 2;
+            float riskFactor = ((security * 1.2f) - skill) * difficultyMult;
+
+            if (riskFactor < 2) riskFactor = 2; // Toujours 2% de chance minimum de se faire chopper
 
             if (MBRandom.RandomFloat * 100 < riskFactor)
             {
+                // Si le héros était "virtuel", on s'assure qu'il est "Active" pour être prisonnier
                 if (spy.HeroState == Hero.CharacterStates.Disabled)
                     spy.ChangeState(Hero.CharacterStates.Active);
 
+                // On téléporte le héros dans la prison de la ville avant de le déclarer prisonnier
+                // Cela évite qu'il soit prisonnier "dans le vide"
+                TeleportHeroAction.ApplyImmediateTeleportToSettlement(spy, target);
+
                 ShowSpyResultPopup(spy, "Agent Captured!", $"{spy.Name} has been caught by the guards of {target.Name}!\nThey are now rotting in the dungeon.", "Damn it!");
+
+                // Action officielle de capture
                 TakePrisonerAction.Apply(target.Party, spy);
                 return true;
             }
@@ -233,6 +220,8 @@ namespace CompanionSabotageSystem
         private void PerformSabotage(SpyData data)
         {
             Settlement target = data.TargetSettlement;
+            if (target.Town == null) return; // Sécurité chateau/ville
+
             float skillFactor = data.Agent.GetSkillValue(DefaultSkills.Roguery) / 100f;
 
             // Food Sabotage
@@ -255,23 +244,20 @@ namespace CompanionSabotageSystem
 
         private void StartReturnJourney(Hero spy, SpyData data)
         {
-            // CORRECTION : GetDistance 5 arguments
-            float distance = Campaign.Current.Models.MapDistanceModel.GetDistance(
-                MobileParty.MainParty,
-                data.TargetSettlement,
-                false,
-                MobileParty.NavigationType.Default,
-                out _
-            );
+            // CORRECTION : Utilisation de .Position et .DistanceSquared
+            float distSq = MobileParty.MainParty.Position.DistanceSquared(data.TargetSettlement.Position);
+            float rawDistance = (float)Math.Sqrt(distSq);
 
-            int returnDays = (int)Math.Ceiling(distance / 40f);
-            if (returnDays < 1) returnDays = 1;
+            float returnHours = (rawDistance * 1.25f) / 5.0f;
+            if (returnHours < 2f) returnHours = 2f;
 
             data.State = SpyState.ReturningToPlayer;
-            data.DaysRemaining = returnDays;
+            data.HoursRemaining = returnHours;
 
-            InformationManager.DisplayMessage(new InformationMessage($"Mission complete. {spy.Name} is returning to base ({returnDays} days).", Colors.Green));
-            spy.AddSkillXp(DefaultSkills.Roguery, 800);
+            float xpMult = SabotageSettings.Instance != null ? SabotageSettings.Instance.XPGainMultiplier : 1.0f;
+            spy.AddSkillXp(DefaultSkills.Roguery, 800 * xpMult);
+
+            InformationManager.DisplayMessage(new InformationMessage($"Mission complete. {spy.Name} is returning to base ({Math.Ceiling(returnHours / 24f)} days).", Colors.Green));
         }
 
         private void ReturnSpyFinal(Hero spy, SpyData data)
@@ -281,8 +267,10 @@ namespace CompanionSabotageSystem
                 spy.ChangeState(Hero.CharacterStates.Active);
             }
 
+            // Le héros réapparaît instantanément dans la party du joueur
             TeleportHeroAction.ApplyImmediateTeleportToParty(spy, MobileParty.MainParty);
 
+            // Double sécurité pour l'ajouter au roster si TeleportHeroAction ne l'a pas fait (ça dépend des versions de l'API)
             if (!MobileParty.MainParty.MemberRoster.Contains(spy.CharacterObject))
             {
                 MobileParty.MainParty.MemberRoster.AddToCounts(spy.CharacterObject, 1);
@@ -293,12 +281,19 @@ namespace CompanionSabotageSystem
             if (data.TotalLoyaltyLost > 0) statsReport += $"- Loyalty Reduced: {data.TotalLoyaltyLost:F1}\n";
             if (string.IsNullOrEmpty(statsReport)) statsReport = "No significant damage caused.";
 
-            ShowSpyResultPopup(
-                spy,
-                "Mission Accomplished",
-                $"{spy.Name} has returned from the shadows of {data.TargetSettlement.Name}.\n\nMission Report:\n{statsReport}\n(Roguery XP Gained)",
-                "Excellent"
-            );
+            if (SabotageSettings.Instance == null || SabotageSettings.Instance.ShowPopups)
+            {
+                ShowSpyResultPopup(
+                    spy,
+                    "Mission Accomplished",
+                    $"{spy.Name} has returned from the shadows of {data.TargetSettlement.Name}.\n\nMission Report:\n{statsReport}\n(Roguery XP Gained)",
+                    "Excellent"
+                );
+            }
+            else
+            {
+                InformationManager.DisplayMessage(new InformationMessage($"{spy.Name} returned. Report: Food -{data.TotalFoodDestroyed}, Loyalty -{data.TotalLoyaltyLost:F1}", Colors.Green));
+            }
         }
 
         private void ShowSpyResultPopup(Hero spy, string title, string description, string buttonText)

@@ -17,7 +17,7 @@ namespace CompanionSabotageSystem
         public Settlement TargetSettlement;
 
         [SaveableField(2)]
-        public int DaysRemaining;
+        public float HoursRemaining;
 
         [SaveableField(3)]
         public SpyState State; // Maintenant il reconnait SpyState
@@ -36,11 +36,11 @@ namespace CompanionSabotageSystem
 
         public SpyData() { }
 
-        public SpyData(Hero agent, Settlement target, int days, SpyState state)
+        public SpyData(Hero agent, Settlement target, float hours, SpyState state)
         {
             Agent = agent;
             TargetSettlement = target;
-            DaysRemaining = days;
+            HoursRemaining = hours;
             State = state;
         }
     }
