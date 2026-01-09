@@ -1,7 +1,7 @@
-﻿using TaleWorlds.CampaignSystem;
+﻿using HarmonyLib;
+using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
-using HarmonyLib; // Ajout Harmony
 
 namespace CompanionSabotageSystem
 {
@@ -10,8 +10,10 @@ namespace CompanionSabotageSystem
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
+
             // Initialisation de Harmony
-            new Harmony("com.gametuto.companionsabotagesystem").PatchAll();
+            // Cela permet d'appliquer des patchs si vous en créez plus tard
+            new Harmony("com.companionsabotage.mod").PatchAll();
         }
 
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)

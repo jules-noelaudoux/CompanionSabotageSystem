@@ -17,10 +17,10 @@ namespace CompanionSabotageSystem
         public Settlement TargetSettlement;
 
         [SaveableField(2)]
-        public float HoursRemaining;
+        public int DaysRemaining;
 
         [SaveableField(3)]
-        public SpyState State; // Maintenant il reconnait SpyState
+        public SpyState State;
 
         [SaveableField(6)]
         public Hero Agent;
@@ -31,16 +31,14 @@ namespace CompanionSabotageSystem
         [SaveableField(5)]
         public float TotalLoyaltyLost = 0f;
 
-        [SaveableField(7)]
-        public string PartyId;
-
+        // Constructeur vide requis pour la sauvegarde
         public SpyData() { }
 
-        public SpyData(Hero agent, Settlement target, float hours, SpyState state)
+        public SpyData(Hero agent, Settlement target, int days, SpyState state)
         {
             Agent = agent;
             TargetSettlement = target;
-            HoursRemaining = hours;
+            DaysRemaining = days;
             State = state;
         }
     }

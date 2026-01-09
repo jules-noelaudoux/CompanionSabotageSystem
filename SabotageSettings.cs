@@ -1,6 +1,7 @@
 ﻿using MCM.Abstractions.Attributes;
 using MCM.Abstractions.Attributes.v2;
 using MCM.Abstractions.Base.Global;
+using TaleWorlds.Localization;
 
 namespace CompanionSabotageSystem
 {
@@ -9,15 +10,24 @@ namespace CompanionSabotageSystem
         public override string Id => "CompanionSabotageSystem";
         public override string DisplayName => "Companion Sabotage System";
         public override string FolderName => "CompanionSabotage";
-        public override string FormatType => "json2";
+        public override string FormatType => "json";
 
-        [SettingPropertyFloatingInteger("Difficulty Factor", 0.5f, 2.0f, "0.0", Order = 1, RequireRestart = false, HintText = "Multiplies the risk of capture. 1.0 is default.")]
-        public float DifficultyFactor { get; set; } = 1.0f;
+        // Note: Pour MCM, on met {=Key}Texte directement dans l'attribut.
 
-        [SettingPropertyFloatingInteger("XP Gain Multiplier", 0.5f, 5.0f, "0.0", Order = 2, RequireRestart = false, HintText = "Multiplies the Roguery XP gained after mission.")]
-        public float XPGainMultiplier { get; set; } = 1.0f;
+        [SettingPropertyInteger("{=css_set_xp}Roguery XP Gain", 0, 5000, "0 XP", Order = 1, RequireRestart = false, HintText = "{=css_set_xp_hint}XP gained by the companion after a successful mission.")]
+        [SettingPropertyGroup("General")]
+        public int XpGain { get; set; } = 800;
 
-        [SettingPropertyBool("Show Popups", Order = 3, RequireRestart = false, HintText = "If disabled, results will be shown as simple text messages.")]
-        public bool ShowPopups { get; set; } = true;
+        [SettingPropertyFloatingInteger("{=css_set_capture}Capture Chance Multiplier", 0.1f, 5.0f, "0.0x", Order = 2, RequireRestart = false, HintText = "{=css_set_capture_hint}Multiplies the risk of being caught. Higher is harder.")]
+        [SettingPropertyGroup("Difficulty")]
+        public float CaptureChanceMultiplier { get; set; } = 1.0f;
+
+        [SettingPropertyInteger("{=css_set_travel}Travel Speed (Days per distance)", 1, 10, "0 days", Order = 3, RequireRestart = false, HintText = "{=css_set_travel_hint}How fast spies travel. Lower is faster.")]
+        [SettingPropertyGroup("General")]
+        public int TravelSpeedDivisor { get; set; } = 50;
+
+        [SettingPropertyInteger("{=css_set_food}Food Sabotage Amount", 1, 100, "0", Order = 4, RequireRestart = false, HintText = "{=css_set_food_hint}Base amount of food destroyed.")]
+        [SettingPropertyGroup("Sabotage Impact")]
+        public int FoodSabotageBase { get; set; } = 20;
     }
 }

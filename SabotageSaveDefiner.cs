@@ -6,24 +6,22 @@ namespace CompanionSabotageSystem
 {
     public class SabotageSaveDefiner : SaveableTypeDefiner
     {
-        // On utilise un ID unique assez grand pour éviter les conflits avec d'autres mods
         public SabotageSaveDefiner() : base(854_120_333) { }
 
         protected override void DefineClassTypes()
         {
-            // On déclare notre classe custom
             AddClassDefinition(typeof(SpyData), 1);
+            // AJOUT IMPORTANT : On définit SpyManager pour qu'il puisse être sauvegardé
+            AddClassDefinition(typeof(SpyManager), 2);
         }
 
         protected override void DefineEnumTypes()
         {
-            // On déclare notre Enum
-            AddEnumDefinition(typeof(SpyState), 2);
+            AddEnumDefinition(typeof(SpyState), 3);
         }
 
         protected override void DefineContainerDefinitions()
         {
-            // On déclare le Dictionnaire Hero -> SpyData
             ConstructContainerDefinition(typeof(Dictionary<Hero, SpyData>));
         }
     }
