@@ -1,33 +1,72 @@
-﻿using MCM.Abstractions.Attributes;
-using MCM.Abstractions.Attributes.v2;
-using MCM.Abstractions.Base.Global;
-using TaleWorlds.Localization;
+﻿using TaleWorlds.ModuleManager;
 
 namespace CompanionSabotageSystem
 {
-    public class SabotageSettings : AttributeGlobalSettings<SabotageSettings>
+    // C'est cette classe que tout le reste du mod utilisera.
+    // Elle ne plante pas si MCM est absent.
+    public static class SettingsProvider
     {
-        public override string Id => "CompanionSabotageSystem";
-        public override string DisplayName => "Companion Sabotage System";
-        public override string FolderName => "CompanionSabotage";
-        public override string FormatType => "json";
+        private static bool? _isMcmPresent;
+        private static bool IsMcmPresent
+        {
+            get
+            {
+                if (!_isMcmPresent.HasValue)
+                {
+                    // Vérifie si la DLL de MCM est chargée dans le domaine
+                    _isMcmPresent = ModuleHelper.GetModuleInfo("Bannerlord.MBOptionScreen") != null;
+                }
+                return _isMcmPresent.Value;
+            }
+        }
 
-        // Note: Pour MCM, on met {=Key}Texte directement dans l'attribut.
+        // --- Valeurs par défaut (si MCM absent) ---
+        private const int DefaultXpGain = 800;
+        private const float DefaultCaptureChance = 1.0f;
+        private const int DefaultTravelSpeed = 50;
+        private const int DefaultFoodSabotage = 20;
 
-        [SettingPropertyInteger("{=css_set_xp}Roguery XP Gain", 0, 5000, "0 XP", Order = 1, RequireRestart = false, HintText = "{=css_set_xp_hint}XP gained by the companion after a successful mission.")]
-        [SettingPropertyGroup("General")]
-        public int XpGain { get; set; } = 800;
+        // --- Propriétés accessibles publiquement ---
 
-        [SettingPropertyFloatingInteger("{=css_set_capture}Capture Chance Multiplier", 0.1f, 5.0f, "0.0x", Order = 2, RequireRestart = false, HintText = "{=css_set_capture_hint}Multiplies the risk of being caught. Higher is harder.")]
-        [SettingPropertyGroup("Difficulty")]
-        public float CaptureChanceMultiplier { get; set; } = 1.0f;
+        public static int XpGain
+            => IsMcmPresent ? GetMcmXpGain() : DefaultXpGain;
 
-        [SettingPropertyInteger("{=css_set_travel}Travel Speed (Days per distance)", 1, 10, "0 days", Order = 3, RequireRestart = false, HintText = "{=css_set_travel_hint}How fast spies travel. Lower is faster.")]
-        [SettingPropertyGroup("General")]
-        public int TravelSpeedDivisor { get; set; } = 50;
+        public static float CaptureChanceMultiplier
+            => IsMcmPresent ? GetMcmCaptureChance() : DefaultCaptureChance;
 
-        [SettingPropertyInteger("{=css_set_food}Food Sabotage Amount", 1, 100, "0", Order = 4, RequireRestart = false, HintText = "{=css_set_food_hint}Base amount of food destroyed.")]
-        [SettingPropertyGroup("Sabotage Impact")]
-        public int FoodSabotageBase { get; set; } = 20;
+        public static int TravelSpeedDivisor
+            => IsMcmPresent ? GetMcmTravelSpeed() : DefaultTravelSpeed;
+
+        public static int FoodSabotageBase
+            => IsMcmPresent ? GetMcmFoodSabotage() : DefaultFoodSabotage;
+
+
+        // --- Méthodes d'isolation (Appelées seulement si IsMcmPresent est vrai) ---
+        // Il est crucial de mettre ces appels dans des méthodes séparées pour éviter que le JIT ne charge la classe manquante.
+
+        private static int GetMcmXpGain()
+        {
+            // On utilise la reflection ou un try-catch implicite via l'isolation pour éviter le crash
+            try { return SabotageSettingsMCM.Instance?.XpGain ?? DefaultXpGain; }
+            catch { return DefaultXpGain; }
+        }
+
+        private static float GetMcmCaptureChance()
+        {
+            try { return SabotageSettingsMCM.Instance?.CaptureChanceMultiplier ?? DefaultCaptureChance; }
+            catch { return DefaultCaptureChance; }
+        }
+
+        private static int GetMcmTravelSpeed()
+        {
+            try { return SabotageSettingsMCM.Instance?.TravelSpeedDivisor ?? DefaultTravelSpeed; }
+            catch { return DefaultTravelSpeed; }
+        }
+
+        private static int GetMcmFoodSabotage()
+        {
+            try { return SabotageSettingsMCM.Instance?.FoodSabotageBase ?? DefaultFoodSabotage; }
+            catch { return DefaultFoodSabotage; }
+        }
     }
 }

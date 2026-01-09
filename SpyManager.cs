@@ -6,8 +6,8 @@ using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
-using TaleWorlds.SaveSystem;
 using TaleWorlds.Localization;
+using TaleWorlds.SaveSystem;
 
 namespace CompanionSabotageSystem
 {
@@ -20,7 +20,8 @@ namespace CompanionSabotageSystem
         {
             float distance = Campaign.Current.Models.MapDistanceModel.GetDistance(MobileParty.MainParty, target, false, MobileParty.NavigationType.Default, out _);
 
-            int divisor = SabotageSettings.Instance != null ? SabotageSettings.Instance.TravelSpeedDivisor : 50;
+            // MODIFICATION ICI : Appel sécurisé via SettingsProvider
+            int divisor = SettingsProvider.TravelSpeedDivisor;
             int travelDays = (distance < 1f) ? 0 : (int)Math.Ceiling(distance / (float)divisor);
 
             MobileParty.MainParty.MemberRoster.AddToCounts(spy.CharacterObject, -1);
@@ -67,20 +68,20 @@ namespace CompanionSabotageSystem
 
                 var data = _activeSpies[spy];
 
-                // 1. SÉCURITÉ PRISONNIER : S'il est prisonnier, on arrête de le gérer immédiatement.
+                // 1. SÉCURITÉ PRISONNIER
                 if (spy.IsPrisoner)
                 {
                     toRemove.Add(spy);
                     continue;
                 }
 
-                // 2. Watchdog : Force l'état Disabled si le jeu vanilla l'a réactivé par erreur
+                // 2. Watchdog
                 if (data.State != SpyState.ReturningToPlayer && spy.HeroState != Hero.CharacterStates.Disabled)
                 {
                     spy.ChangeState(Hero.CharacterStates.Disabled);
                 }
 
-                // 3. SÉCURITÉ SIÈGE & FACTION : On annule si la situation change
+                // 3. SÉCURITÉ SIÈGE & FACTION
                 if (data.State != SpyState.ReturningToPlayer)
                 {
                     if (data.TargetSettlement.IsUnderSiege || data.TargetSettlement.MapFaction == MobileParty.MainParty.MapFaction)
@@ -149,7 +150,9 @@ namespace CompanionSabotageSystem
         {
             float security = target.Town.Security;
             float skill = spy.GetSkillValue(DefaultSkills.Roguery);
-            float multiplier = SabotageSettings.Instance != null ? SabotageSettings.Instance.CaptureChanceMultiplier : 1.0f;
+
+            // MODIFICATION ICI : Appel sécurisé
+            float multiplier = SettingsProvider.CaptureChanceMultiplier;
 
             float riskFactor = ((security * 1.2f) - skill) * multiplier;
             if (riskFactor < 2) riskFactor = 2;
@@ -163,7 +166,6 @@ namespace CompanionSabotageSystem
 
                 if (jailer != null)
                 {
-                    // Action Vanilla : Elle gère la capture ET l'affichage du message.
                     TakePrisonerAction.Apply(jailer, spy);
                     return true;
                 }
@@ -180,7 +182,9 @@ namespace CompanionSabotageSystem
         {
             Settlement target = data.TargetSettlement;
             float skillFactor = data.Agent.GetSkillValue(DefaultSkills.Roguery) / 100f;
-            int baseFoodDamage = SabotageSettings.Instance != null ? SabotageSettings.Instance.FoodSabotageBase : 20;
+
+            // MODIFICATION ICI : Appel sécurisé
+            int baseFoodDamage = SettingsProvider.FoodSabotageBase;
 
             if (target.Town.FoodStocks > 0)
             {
@@ -205,7 +209,8 @@ namespace CompanionSabotageSystem
                 return;
             }
 
-            int divisor = SabotageSettings.Instance != null ? SabotageSettings.Instance.TravelSpeedDivisor : 50;
+            // MODIFICATION ICI : Appel sécurisé
+            int divisor = SettingsProvider.TravelSpeedDivisor;
             int returnDays = (int)Math.Ceiling(distance / (float)divisor);
             if (returnDays < 1) returnDays = 1;
 
@@ -220,7 +225,8 @@ namespace CompanionSabotageSystem
             msg.SetTextVariable("DAYS", returnDays);
             InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Green));
 
-            int xp = SabotageSettings.Instance != null ? SabotageSettings.Instance.XpGain : 800;
+            // MODIFICATION ICI : Appel sécurisé
+            int xp = SettingsProvider.XpGain;
             spy.AddSkillXp(DefaultSkills.Roguery, xp);
         }
 
@@ -238,7 +244,8 @@ namespace CompanionSabotageSystem
 
             if (data.State != SpyState.ReturningToPlayer)
             {
-                int xp = SabotageSettings.Instance != null ? SabotageSettings.Instance.XpGain : 800;
+                // MODIFICATION ICI : Appel sécurisé
+                int xp = SettingsProvider.XpGain;
                 spy.AddSkillXp(DefaultSkills.Roguery, xp);
             }
 
