@@ -39,13 +39,8 @@ namespace CompanionSabotageSystem
             bool CanSendSpy(MenuCallbackArgs args)
             {
                 args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
-
-                // Vérifications de base
                 if (Settlement.CurrentSettlement == null || Settlement.CurrentSettlement.IsVillage) return false;
-
-                // Interdiction : Chez nous, ou si siège en cours
                 if (Settlement.CurrentSettlement.OwnerClan == Clan.PlayerClan || Settlement.CurrentSettlement.IsUnderSiege) return false;
-
                 return true;
             }
 
@@ -53,14 +48,12 @@ namespace CompanionSabotageSystem
             {
                 OpenSpySelectionList();
             }
-            // ------------------------------------------
 
-            // 1. Menu pour les VILLES ("town")
-            starter.AddGameMenuOption("town", "sabotage_mission_town", "{=css_menu_option}Send an Agent",
+            // ID: G7k3n9Lp (Send an Agent)
+            starter.AddGameMenuOption("town", "sabotage_mission_town", "{=G7k3n9Lp}Send an Agent",
                 CanSendSpy, OpenSpyMenu, false, 2);
 
-            // 2. Menu pour les CHÂTEAUX ("castle")
-            starter.AddGameMenuOption("castle", "sabotage_mission_castle", "{=css_menu_option}Send an Agent",
+            starter.AddGameMenuOption("castle", "sabotage_mission_castle", "{=G7k3n9Lp}Send an Agent",
                 CanSendSpy, OpenSpyMenu, false, 2);
         }
 
@@ -77,7 +70,8 @@ namespace CompanionSabotageSystem
 
                     if (h.GetSkillValue(DefaultSkills.Roguery) >= 30 && h.HitPoints > 40)
                     {
-                        TextObject info = new TextObject("{=css_agent_info}Roguery: {SKILL} | HP: {HP}%");
+                        // ID: R8t5y2U1 (Agent Info)
+                        TextObject info = new TextObject("{=R8t5y2U1}Roguery: {SKILL} | HP: {HP}%");
                         info.SetTextVariable("SKILL", h.GetSkillValue(DefaultSkills.Roguery));
                         info.SetTextVariable("HP", h.HitPoints);
 
@@ -88,19 +82,21 @@ namespace CompanionSabotageSystem
 
             if (spies.Count == 0)
             {
-                InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=css_no_agents}No agents available (Roguery 30+ required).").ToString(), Colors.Red));
+                // ID: L3k6n2P9 (No Agents)
+                InformationManager.DisplayMessage(new InformationMessage(new TextObject("{=L3k6n2P9}No agents available (Roguery 30+ required).").ToString(), Colors.Red));
                 return;
             }
 
+            // IDs: P4s2m1K9 (Title), X8v6r3N2 (Desc), H5j2b8M4 (Deploy), W9q1z7V3 (Cancel)
             MBInformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData(
-                new TextObject("{=css_menu_title}Infiltration Mission").ToString(),
-                new TextObject("{=css_menu_desc}Select an agent for the operation.").ToString(),
+                new TextObject("{=P4s2m1K9}Infiltration Mission").ToString(),
+                new TextObject("{=X8v6r3N2}Select an agent for the operation.").ToString(),
                 spies,
                 true,
                 1,
                 1,
-                new TextObject("{=css_deploy_btn}Deploy").ToString(),
-                new TextObject("{=css_cancel_btn}Cancel").ToString(),
+                new TextObject("{=H5j2b8M4}Deploy").ToString(),
+                new TextObject("{=W9q1z7V3}Cancel").ToString(),
                 list => _spyManager.DeploySpy((Hero)list[0].Identifier, Settlement.CurrentSettlement),
                 list => { },
                 "",

@@ -6,21 +6,20 @@ using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
-using TaleWorlds.Localization;
 using TaleWorlds.SaveSystem;
+using TaleWorlds.Localization;
 
 namespace CompanionSabotageSystem
 {
     public class SpyManager
     {
         [SaveableField(1)]
-        private readonly Dictionary<Hero, SpyData> _activeSpies = new Dictionary<Hero, SpyData>();
+        private Dictionary<Hero, SpyData> _activeSpies = new Dictionary<Hero, SpyData>();
 
         public void DeploySpy(Hero spy, Settlement target)
         {
             float distance = Campaign.Current.Models.MapDistanceModel.GetDistance(MobileParty.MainParty, target, false, MobileParty.NavigationType.Default, out _);
 
-            // MODIFICATION ICI : Appel sécurisé via SettingsProvider
             int divisor = SettingsProvider.TravelSpeedDivisor;
             int travelDays = (distance < 1f) ? 0 : (int)Math.Ceiling(distance / (float)divisor);
 
@@ -36,7 +35,8 @@ namespace CompanionSabotageSystem
 
                 if (travelDays > 0)
                 {
-                    TextObject msg = new TextObject("{=css_depart_travel}{AGENT} departs for {TARGET} ({DAYS} days).");
+                    // ID: O4p9a2S5 (Depart Travel)
+                    TextObject msg = new TextObject("{=O4p9a2S5}{AGENT} departs for {TARGET} ({DAYS} days).");
                     msg.SetTextVariable("AGENT", spy.Name);
                     msg.SetTextVariable("TARGET", target.Name);
                     msg.SetTextVariable("DAYS", travelDays);
@@ -44,7 +44,8 @@ namespace CompanionSabotageSystem
                 }
                 else
                 {
-                    TextObject msg = new TextObject("{=css_depart_instant}{AGENT} slips into {TARGET}...");
+                    // ID: D8f3g6H1 (Depart Instant)
+                    TextObject msg = new TextObject("{=D8f3g6H1}{AGENT} slips into {TARGET}...");
                     msg.SetTextVariable("AGENT", spy.Name);
                     msg.SetTextVariable("TARGET", target.Name);
                     InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Gray));
@@ -68,25 +69,23 @@ namespace CompanionSabotageSystem
 
                 var data = _activeSpies[spy];
 
-                // 1. SÉCURITÉ PRISONNIER
                 if (spy.IsPrisoner)
                 {
                     toRemove.Add(spy);
                     continue;
                 }
 
-                // 2. Watchdog
                 if (data.State != SpyState.ReturningToPlayer && spy.HeroState != Hero.CharacterStates.Disabled)
                 {
                     spy.ChangeState(Hero.CharacterStates.Disabled);
                 }
 
-                // 3. SÉCURITÉ SIÈGE & FACTION
                 if (data.State != SpyState.ReturningToPlayer)
                 {
                     if (data.TargetSettlement.IsUnderSiege || data.TargetSettlement.MapFaction == MobileParty.MainParty.MapFaction)
                     {
-                        TextObject msg = new TextObject("{=css_mission_abort}Mission aborted: {TARGET} is unstable. {AGENT} is returning.");
+                        // ID: J5k2l9Z4 (Mission Abort)
+                        TextObject msg = new TextObject("{=J5k2l9Z4}Mission aborted: {TARGET} is unstable. {AGENT} is returning.");
                         msg.SetTextVariable("TARGET", data.TargetSettlement.Name);
                         msg.SetTextVariable("AGENT", spy.Name);
                         InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Red));
@@ -106,7 +105,8 @@ namespace CompanionSabotageSystem
                             data.State = SpyState.Infiltrating;
                             data.DaysRemaining = 5;
 
-                            TextObject msg = new TextObject("{=css_arrived}{AGENT} arrived at {TARGET}. Sabotage begins.");
+                            // ID: X7c3v6B9 (Arrived)
+                            TextObject msg = new TextObject("{=X7c3v6B9}{AGENT} arrived at {TARGET}. Sabotage begins.");
                             msg.SetTextVariable("AGENT", spy.Name);
                             msg.SetTextVariable("TARGET", data.TargetSettlement.Name);
                             InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Yellow));
@@ -150,8 +150,6 @@ namespace CompanionSabotageSystem
         {
             float security = target.Town.Security;
             float skill = spy.GetSkillValue(DefaultSkills.Roguery);
-
-            // MODIFICATION ICI : Appel sécurisé
             float multiplier = SettingsProvider.CaptureChanceMultiplier;
 
             float riskFactor = ((security * 1.2f) - skill) * multiplier;
@@ -182,8 +180,6 @@ namespace CompanionSabotageSystem
         {
             Settlement target = data.TargetSettlement;
             float skillFactor = data.Agent.GetSkillValue(DefaultSkills.Roguery) / 100f;
-
-            // MODIFICATION ICI : Appel sécurisé
             int baseFoodDamage = SettingsProvider.FoodSabotageBase;
 
             if (target.Town.FoodStocks > 0)
@@ -209,7 +205,6 @@ namespace CompanionSabotageSystem
                 return;
             }
 
-            // MODIFICATION ICI : Appel sécurisé
             int divisor = SettingsProvider.TravelSpeedDivisor;
             int returnDays = (int)Math.Ceiling(distance / (float)divisor);
             if (returnDays < 1) returnDays = 1;
@@ -220,12 +215,12 @@ namespace CompanionSabotageSystem
             if (spy.HeroState != Hero.CharacterStates.Disabled)
                 spy.ChangeState(Hero.CharacterStates.Disabled);
 
-            TextObject msg = new TextObject("{=css_mission_done}{AGENT} mission done. Returning ({DAYS} days).");
+            // ID: N2m5q8W3 (Mission Done)
+            TextObject msg = new TextObject("{=N2m5q8W3}Mission done. Returning ({DAYS} days).");
             msg.SetTextVariable("AGENT", spy.Name);
             msg.SetTextVariable("DAYS", returnDays);
             InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Green));
 
-            // MODIFICATION ICI : Appel sécurisé
             int xp = SettingsProvider.XpGain;
             spy.AddSkillXp(DefaultSkills.Roguery, xp);
         }
@@ -244,12 +239,12 @@ namespace CompanionSabotageSystem
 
             if (data.State != SpyState.ReturningToPlayer)
             {
-                // MODIFICATION ICI : Appel sécurisé
                 int xp = SettingsProvider.XpGain;
                 spy.AddSkillXp(DefaultSkills.Roguery, xp);
             }
 
-            TextObject msg = new TextObject("{=css_back_in_party}{AGENT} is back in the party.");
+            // ID: E4r7t1Y6 (Back in Party)
+            TextObject msg = new TextObject("{=E4r7t1Y6}{AGENT} is back in the party.");
             msg.SetTextVariable("AGENT", spy.Name);
             InformationManager.DisplayMessage(new InformationMessage(msg.ToString(), Colors.Green));
         }
