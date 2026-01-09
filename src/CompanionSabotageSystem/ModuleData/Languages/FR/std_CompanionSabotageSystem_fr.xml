@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+  <tags>
+    <tag language="Français" />
+  </tags>
+  <strings>
+    <string id="G7k3n9Lp" text="Envoyer un agent" />
+    <string id="P4s2m1K9" text="Mission d'infiltration" />
+    <string id="X8v6r3N2" text="Sélectionnez un agent pour l'opération." />
+    <string id="H5j2b8M4" text="Déployer" />
+    <string id="W9q1z7V3" text="Annuler" />
+    <string id="L3k6n2P9" text="Aucun agent disponible (Roublardise 30+ requise)." />
+    <string id="R8t5y2U1" text="Roublardise : {SKILL} | PV : {HP}%" />
+
+    <string id="Q2w9e4R7" text="Gain d'XP Roublardise" />
+    <string id="Y6u3i8O5" text="XP gagnée par le compagnon après une mission réussie." />
+    <string id="A1s4d7F2" text="Multiplicateur de capture" />
+    <string id="G3h6j9K5" text="Multiplie le risque d'être pris. Plus haut = plus difficile." />
+    <string id="L2z5x8C3" text="Vitesse de voyage" />
+    <string id="V6b9n4M7" text="Vitesse de voyage des espions. Plus bas = plus rapide." />
+    <string id="Q8w5e2R4" text="Sabotage de nourriture" />
+    <string id="T7y1u3I6" text="Quantité de base de nourriture détruite." />
+
+    <string id="gen_grp" text="Général" />
+    <string id="diff_grp" text="Difficulté" />
+    <string id="sab_grp" text="Impact Sabotage" />
+
+    <string id="O4p9a2S5" text="{AGENT} part pour {TARGET} ({DAYS} jours)." />
+    <string id="D8f3g6H1" text="{AGENT} se faufile dans {TARGET}..." />
+    <string id="J5k2l9Z4" text="Mission annulée : {TARGET} est instable. {AGENT} rentre." />
+    <string id="X7c3v6B9" text="{AGENT} est arrivé à {TARGET}. Le sabotage commence." />
+    <string id="N2m5q8W3" text="Mission terminée pour {AGENT}. Retour ({DAYS} jours)." />
+    <string id="E4r7t1Y6" text="{AGENT} est de retour dans le groupe." />
+  </strings>
+</base>

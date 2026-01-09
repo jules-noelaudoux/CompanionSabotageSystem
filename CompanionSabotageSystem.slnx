@@ -3,7 +3,7 @@
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="CompanionSabotageSystem.csproj" Id="cb01a97a-f8f7-4c6c-adc6-97eb2787d579">
+  <Project Path="src/CompanionSabotageSystem/CompanionSabotageSystem.csproj" Id="cb01a97a-f8f7-4c6c-adc6-97eb2787d579">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
 </Solution>

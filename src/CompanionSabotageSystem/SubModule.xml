@@ -1,0 +1,46 @@
+<Module>
+    <Name value="Companion Sabotage System"/>
+    <Id value="CompanionSabotageSystem"/>
+    <Version value="v1.0.0.0"/>
+    
+    <ModuleCategory value="Singleplayer"/>
+    <ModuleType value="Community"/>
+    <SingleplayerModule value="true"/>
+    <MultiplayerModule value="false"/>
+    
+    <DependedModules>
+        <DependedModule Id="Native" />
+        <DependedModule Id="SandBoxCore" />
+        <DependedModule Id="Sandbox" />
+        <DependedModule Id="StoryMode" />
+        <DependedModule Id="CustomBattle" />
+        
+        <DependedModule Id="Bannerlord.Harmony" />
+        <DependedModule Id="Bannerlord.MBOptionScreen" Optional="true" />
+    </DependedModules>
+    
+    <DependedModuleMetadatas>
+        <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" />
+        <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" />
+        
+        <DependedModuleMetadata id="Native" order="LoadBeforeThis" />
+        <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" />
+        <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" />
+        <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" />
+        <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" />
+    </DependedModuleMetadatas>
+    
+    <SubModules>
+        <SubModule>
+            <Name value="CompanionSabotageSystem"/>
+            <DLLName value="CompanionSabotageSystem.dll"/>
+            <SubModuleClassType value="CompanionSabotageSystem.SabotageSubModule"/>
+            <Tags>
+                <Tag key="DedicatedServerType" value="none" />
+                <Tag key="IsNoRenderModeElement" value="false" />
+            </Tags>
+        </SubModule>
+    </SubModules>
+    
+    <Xmls/>
+</Module>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+  <tags>
+    <tag language="English" />
+  </tags>
+  <strings>
+    <string id="G7k3n9Lp" text="Send an Agent" />
+    <string id="P4s2m1K9" text="Infiltration Mission" />
+    <string id="X8v6r3N2" text="Select an agent for the operation." />
+    <string id="H5j2b8M4" text="Deploy" />
+    <string id="W9q1z7V3" text="Cancel" />
+    <string id="L3k6n2P9" text="No agents available (Roguery 30+ required)." />
+    <string id="R8t5y2U1" text="Roguery: {SKILL} | HP: {HP}%" />
+
+    <string id="Q2w9e4R7" text="Roguery XP Gain" />
+    <string id="Y6u3i8O5" text="XP gained by the companion after a successful mission." />
+    <string id="A1s4d7F2" text="Capture Chance Multiplier" />
+    <string id="G3h6j9K5" text="Multiplies the risk of being caught. Higher is harder." />
+    <string id="L2z5x8C3" text="Travel Speed (Days per distance)" />
+    <string id="V6b9n4M7" text="How fast spies travel. Lower is faster." />
+    <string id="Q8w5e2R4" text="Food Sabotage Amount" />
+    <string id="T7y1u3I6" text="Base amount of food destroyed." />
+    
+    <string id="gen_grp" text="General" />
+    <string id="diff_grp" text="Difficulty" />
+    <string id="sab_grp" text="Sabotage Impact" />
+
+    <string id="O4p9a2S5" text="{AGENT} departs for {TARGET} ({DAYS} days)." />
+    <string id="D8f3g6H1" text="{AGENT} slips into {TARGET}..." />
+    <string id="J5k2l9Z4" text="Mission aborted: {TARGET} is unstable. {AGENT} is returning." />
+    <string id="X7c3v6B9" text="{AGENT} arrived at {TARGET}. Sabotage begins." />
+    <string id="N2m5q8W3" text="Mission done. Returning ({DAYS} days)." />
+    <string id="E4r7t1Y6" text="{AGENT} is back in the party." />
+  </strings>
+</base>
