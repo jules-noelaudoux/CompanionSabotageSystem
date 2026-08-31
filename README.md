@@ -10,17 +10,17 @@ Instead of launching a direct siege, players can send skilled agents to weaken a
 
 ## Features
 
-### 🕵️ Covert Operations
+### Covert Operations
 * **Infiltration Menu:** A new option, **"Send an Agent"**, is available in the menu of all enemy Towns and Castles.
 * **Agent Requirements:** Not every companion is suitable for spycraft. Agents require a minimum **Roguery skill of 30** and must be healthy (HP > 40%).
 * **Travel & Setup:** Operations are not instant. Agents must travel to the target (based on party distance) and spend time infiltrating local defenses before sabotage begins.
 
-### ⚔️ Sabotage Mechanics
+### Sabotage Mechanics
 Once an agent has successfully infiltrated a settlement, they perform daily sabotage operations:
 * **Food Supply Disruption:** Agents destroy food stocks daily. The amount destroyed scales with the agent's Roguery skill and the settlement's current reserves.
 * **Destabilization:** Sabotage negatively impacts **Loyalty** and **Security**, significantly hampering the enemy's ability to maintain control or recruit noble troops.
 
-### ⚖️ Risk & Consequences
+### Risk & Consequences
 Espionage carries significant risks calculated daily based on the **Settlement Security** vs. **Agent Roguery**.
 * **Capture Logic:** If an agent fails a security check, they are captured immediately.
 * **Imprisonment:** Captured agents are stripped of their role and imprisoned in the settlement's dungeon. They must be ransomed, broken out, or allowed to escape naturally.
